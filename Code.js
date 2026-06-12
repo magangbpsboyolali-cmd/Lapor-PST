@@ -2,25 +2,58 @@
 const SHEET_ID = '19SM7gIz4PYk9WfJn-50jp4yUWcKMTPD7C-mf0YdEEAs';
 
 /**
- * Fungsi wajib GAS untuk merender halaman HTML
+ * Fungsi untuk menangani request GET (API) dari Vercel
  */
 function doGet(e) {
-  let page = e.parameter.page || 'Index';
-  
-  try {
-    let html = HtmlService.createHtmlOutputFromFile(page);
-    return html.setTitle('Aplikasi Pelaporan PST')
-      .setXFrameOptionsMode(HtmlService.XFrameOptionsMode.ALLOWALL)
-      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
-  } catch(err) {
-    // Fallback jika file tidak ditemukan
-    return HtmlService.createHtmlOutput(
-      '<h1>Error</h1>' +
-      '<p>File "' + page + '" tidak ditemukan di Apps Script.</p>' +
-      '<p>Pastikan semua file HTML sudah di-upload.</p>' +
-      '<p>Error: ' + err.toString() + '</p>'
-    );
+  // Handle CORS and preflight
+  if (!e || !e.parameter || !e.parameter.action) {
+    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "No action specified" }))
+      .setMimeType(ContentService.MimeType.JSON);
   }
+
+  const action = e.parameter.action;
+  let result = {};
+
+  try {
+    if (action === "getDaftarPetugas") {
+      result = getDaftarPetugas();
+    } else if (action === "getStatistikLaporan") {
+      result = getStatistikLaporan(e.parameter.tahun);
+    } else if (action === "getLaporanPerBulan") {
+      result = getLaporanPerBulan(e.parameter.tahun);
+    } else if (action === "getLaporanPerMedia") {
+      result = getLaporanPerMedia(e.parameter.tahun);
+    } else if (action === "cekKodeAkses") {
+      result = cekKodeAkses(e.parameter.kode);
+    } else {
+      result = { success: false, message: "Invalid GET action" };
+    }
+  } catch (error) {
+    result = { success: false, message: error.toString() };
+  }
+
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+/**
+ * Fungsi untuk menangani request POST (Simpan Data)
+ */
+function doPost(e) {
+  let result = {};
+  try {
+    const data = JSON.parse(e.postData.contents);
+    if (data.action === "simpanLaporan") {
+      result = simpanLaporan(data.formData);
+    } else {
+      result = { success: false, message: "Invalid POST action" };
+    }
+  } catch(error) {
+    result = { success: false, message: error.toString() };
+  }
+  
+  return ContentService.createTextOutput(JSON.stringify(result))
+    .setMimeType(ContentService.MimeType.JSON);
 }
 
 /**

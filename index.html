@@ -905,6 +905,73 @@
   </div>
 
   <script>
+    // ==================== VERCEL / EXTERNAL API CONFIGURATION ====================
+    // GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT KAMU SETELAH DEPLOY!
+    const SCRIPT_URL = 'https://script.google.com/macros/s/URL_KAMU_DISINI/exec';
+
+    // Polyfill ajaib untuk mensimulasikan google.script.run menggunakan fetch API!
+    // Ini memungkinkan web di-hosting di Vercel/Netlify tanpa mengubah kode JS di bawahnya.
+    if (typeof google === 'undefined') {
+      window.google = {};
+    }
+    
+    if (!google.script) {
+      window.google.script = {
+        run: new Proxy({}, {
+          get: function(target, prop) {
+            if (prop === 'withSuccessHandler') {
+              return function(handler) {
+                target._successHandler = handler;
+                return window.google.script.run;
+              };
+            }
+            if (prop === 'withFailureHandler') {
+              return function(handler) {
+                target._failureHandler = handler;
+                return window.google.script.run;
+              };
+            }
+            
+            // Eksekusi pemanggilan fungsi backend (misal: simpanLaporan, cekKodeAkses)
+            return function(...args) {
+              const successHandler = target._successHandler;
+              const failureHandler = target._failureHandler;
+              
+              // Reset handlers untuk panggilan berikutnya
+              target._successHandler = null;
+              target._failureHandler = null;
+              
+              // Tentukan Method: POST khusus untuk simpan data, sisanya GET
+              const isPost = prop === 'simpanLaporan';
+              let url = SCRIPT_URL + "?action=" + prop;
+              let options = { method: isPost ? 'POST' : 'GET' };
+              
+              if (isPost) {
+                options.body = JSON.stringify({ action: prop, formData: args[0] });
+                options.headers = { 'Content-Type': 'text/plain;charset=utf-8' }; // Hindari CORS Preflight
+              } else {
+                // Parsing argumen ke URL query string untuk metode GET
+                if (prop === 'cekKodeAkses') url += '&kode=' + encodeURIComponent(args[0] || '');
+                if (prop === 'getStatistikLaporan' || prop === 'getLaporanPerBulan' || prop === 'getLaporanPerMedia') {
+                  if (args[0]) url += '&tahun=' + encodeURIComponent(args[0]);
+                }
+              }
+              
+              fetch(url, options)
+                .then(response => response.json())
+                .then(result => {
+                  if (successHandler) successHandler(result);
+                })
+                .catch(error => {
+                  if (failureHandler) failureHandler(error);
+                  console.error("API Error:", error);
+                });
+            };
+          }
+        })
+      };
+    }
+
     let chartPerBulan = null;
     let chartPerMedia = null;
 
