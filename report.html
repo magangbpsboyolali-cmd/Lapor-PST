@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Laporan - Aplikasi Pelaporan PST</title>
+  <base target="_top">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    :root {
+      --primary-color: #3b82f6;
+      --primary-dark: #1e40af;
+      --success-color: #10b981;
+      --warning-color: #f59e0b;
+      --danger-color: #ef4444;
+      --bg-color: #f3f4f6;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --text-primary: #1f2937;
+      --text-secondary: #6b7280;
+      --border-color: #e5e7eb;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: var(--bg-color);
+      color: var(--text-primary);
+      line-height: 1.6;
+    }
+
+    .navbar {
+      background: white;
+      padding: 20px 30px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .navbar-brand {
+      font-size: 20px;
+      font-weight: 700;
+      color: var(--primary-color);
+    }
+
+    .nav-buttons {
+      display: flex;
+      gap: 15px;
+    }
+
+    .btn-nav {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-nav-primary {
+      background: var(--primary-color);
+      color: white;
+    }
+
+    .btn-nav-primary:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(59, 130, 246, 0.3);
+    }
+
+    .btn-nav-secondary {
+      background: transparent;
+      color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-nav-secondary:hover {
+      background: var(--bg-color);
+      color: var(--text-primary);
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 30px 20px;
+    }
+
+    .page-title {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 30px;
+      color: var(--text-primary);
+    }
+
+    .filters {
+      background: white;
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 30px;
+      display: flex;
+      gap: 15px;
+      align-items: flex-end;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+      flex-wrap: wrap;
+    }
+
+    .filter-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .filter-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .filter-input {
+      padding: 10px 15px;
+      border: 2px solid var(--border-color);
+      border-radius: 8px;
+      font-size: 14px;
+      min-width: 150px;
+    }
+
+    .filter-input:focus {
+      outline: none;
+      border-color: var(--primary-color);
+    }
+
+    .btn-filter {
+      padding: 10px 20px;
+      background: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .btn-filter:hover {
+      background: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+      gap: 30px;
+      margin-bottom: 30px;
+    }
+
+    .chart-card {
+      background: white;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .chart-title {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      color: var(--text-primary);
+    }
+
+    .chart-container {
+      position: relative;
+      height: 350px;
+    }
+
+    .stats-summary {
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 2px 15px rgba(0, 0, 0, 0.08);
+      margin-bottom: 30px;
+    }
+
+    .stats-summary-title {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 25px;
+      color: var(--text-primary);
+    }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+    }
+
+    .stat-box {
+      padding: 20px;
+      background: linear-gradient(135deg, var(--bg-color) 0%, white 100%);
+      border-radius: 10px;
+      border-left: 4px solid var(--primary-color);
+    }
+
+    .stat-box.success {
+      border-left-color: var(--success-color);
+    }
+
+    .stat-box.warning {
+      border-left-color: var(--warning-color);
+    }
+
+    .stat-box.danger {
+      border-left-color: var(--danger-color);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 8px;
+    }
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--text-primary);
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .spinner {
+      width: 40px;
+      height: 40px;
+      border: 4px solid rgba(59, 130, 246, 0.2);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      margin: 0 auto;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .loading.show {
+      display: block;
+    }
+
+    .no-data {
+      text-align: center;
+      padding: 40px;
+      color: var(--text-secondary);
+    }
+
+    @media (max-width: 768px) {
+      .navbar {
+        flex-direction: column;
+        gap: 15px;
+      }
+
+      .nav-buttons {
+        width: 100%;
+      }
+
+      .btn-nav {
+        flex: 1;
+      }
+
+      .filters {
+        flex-direction: column;
+      }
+
+      .filter-input {
+        width: 100%;
+      }
+
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .chart-container {
+        height: 300px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-brand">📊 Aplikasi Pelaporan PST</div>
+    <div class="nav-buttons">
+      <button class="btn-nav btn-nav-primary" onclick="goTo('dashboard')">Dashboard</button>
+      <button class="btn-nav btn-nav-primary" onclick="goTo('report')">Laporan</button>
+      <button class="btn-nav btn-nav-secondary" onclick="logout()">Keluar</button>
+    </div>
+  </nav>
+
+  <div class="container">
+    <div class="page-title">📈 Laporan dan Statistik</div>
+
+    <!-- Filter Section -->
+    <div class="filters">
+      <div class="filter-group">
+        <label class="filter-label">Pilih Tahun</label>
+        <input type="number" id="tahunFilter" class="filter-input" value="2024" min="2020" max="2099">
+      </div>
+      <button class="btn-filter" onclick="loadChart()">🔄 Perbarui Laporan</button>
+    </div>
+
+    <!-- Statistics Summary -->
+    <div class="stats-summary">
+      <div class="stats-summary-title">📌 Ringkasan Statistik</div>
+      <div class="stats-row">
+        <div class="stat-box">
+          <div class="stat-label">Total Laporan</div>
+          <div class="stat-value" id="summaryTotal">0</div>
+        </div>
+        <div class="stat-box success">
+          <div class="stat-label">Pengaduan Selesai</div>
+          <div class="stat-value" id="summarySelesai">0</div>
+        </div>
+        <div class="stat-box warning">
+          <div class="stat-label">Pengaduan Masuk</div>
+          <div class="stat-value" id="summaryMasuk">0</div>
+        </div>
+        <div class="stat-box danger">
+          <div class="stat-label">Persentase Selesai</div>
+          <div class="stat-value" id="summaryPercent">0%</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="charts-grid">
+      <div class="chart-card">
+        <div class="chart-title">📅 Laporan Per Bulan (Tahun <span id="tahunDisplay">2024</span>)</div>
+        <div class="loading" id="loadingMonthly">
+          <div class="spinner"></div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartPerBulan"></canvas>
+        </div>
+      </div>
+
+      <div class="chart-card">
+        <div class="chart-title">📞 Laporan Berdasarkan Media Pengaduan</div>
+        <div class="loading" id="loadingMedia">
+          <div class="spinner"></div>
+        </div>
+        <div class="chart-container">
+          <canvas id="chartPerMedia"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script>
+    let chartPerBulan = null;
+    let chartPerMedia = null;
+
+    // Initialize on page load
+    window.addEventListener('load', function() {
+      const tahun = new Date().getFullYear();
+      document.getElementById('tahunFilter').value = tahun;
+      document.getElementById('tahunDisplay').textContent = tahun;
+      loadChart();
+      loadSummary();
+    });
+
+    document.getElementById('tahunFilter').addEventListener('change', function() {
+      document.getElementById('tahunDisplay').textContent = this.value;
+      loadChart();
+    });
+
+    function loadChart() {
+      const tahun = parseInt(document.getElementById('tahunFilter').value);
+
+      // Load chart per bulan
+      document.getElementById('loadingMonthly').classList.add('show');
+      google.script.run
+        .withSuccessHandler(function(data) {
+          document.getElementById('loadingMonthly').classList.remove('show');
+          renderChartBulan(data, tahun);
+        })
+        .getLaporanPerBulan(tahun);
+
+      // Load chart per media
+      document.getElementById('loadingMedia').classList.add('show');
+      google.script.run
+        .withSuccessHandler(function(data) {
+          document.getElementById('loadingMedia').classList.remove('show');
+          renderChartMedia(data);
+        })
+        .getLaporanPerMedia();
+    }
+
+    function loadSummary() {
+      google.script.run
+        .withSuccessHandler(function(data) {
+          document.getElementById('summaryTotal').textContent = data.total;
+          document.getElementById('summaryMasuk').textContent = data.masuk;
+          document.getElementById('summarySelesai').textContent = data.selesai;
+          
+          const percent = data.total > 0 ? Math.round((data.selesai / data.total) * 100) : 0;
+          document.getElementById('summaryPercent').textContent = percent + '%';
+        })
+        .getStatistikLaporan();
+    }
+
+    function renderChartBulan(data, tahun) {
+      const ctx = document.getElementById('chartPerBulan').getContext('2d');
+      
+      if (chartPerBulan) {
+        chartPerBulan.destroy();
+      }
+
+      const labels = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+      ];
+
+      chartPerBulan = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Jumlah Laporan',
+            data: data,
+            backgroundColor: [
+              '#3b82f6', '#60a5fa', '#93c5fd', '#bfdbfe',
+              '#dbeafe', '#eff6ff', '#3b82f6', '#60a5fa',
+              '#93c5fd', '#bfdbfe', '#dbeafe', '#eff6ff'
+            ],
+            borderColor: '#1e40af',
+            borderWidth: 1,
+            borderRadius: 8,
+            tension: 0.4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: true,
+              position: 'bottom'
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              max: Math.max(...data) + 5,
+              ticks: {
+                stepSize: 1
+              }
+            }
+          }
+        }
+      });
+    }
+
+    function renderChartMedia(data) {
+      const ctx = document.getElementById('chartPerMedia').getContext('2d');
+      
+      if (chartPerMedia) {
+        chartPerMedia.destroy();
+      }
+
+      const labels = Object.keys(data);
+      const values = Object.values(data);
+
+      const colors = [
+        '#3b82f6', '#10b981', '#f59e0b', '#ef4444',
+        '#8b5cf6', '#ec4899', '#06b6d4', '#f97316'
+      ];
+
+      chartPerMedia = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: labels,
+          datasets: [{
+            data: values,
+            backgroundColor: colors.slice(0, labels.length),
+            borderColor: 'white',
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: 'bottom'
+            }
+          }
+        }
+      });
+    }
+
+    function logout() {
+      if (confirm('Apakah Anda yakin ingin keluar?')) {
+        window.location.href = 'Index';
+      }
+    }
+
+    function goTo(page) {
+      window.location.href = '?page=' + page;
+    }
+  </script>
+</body>
+</html>
