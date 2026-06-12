@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -614,7 +615,9 @@
     }
 
     @keyframes spin {
-      to { transform: rotate(360deg); }
+      to {
+        transform: rotate(360deg);
+      }
     }
 
     .loading.show {
@@ -662,6 +665,7 @@
     }
   </style>
 </head>
+
 <body>
   <!-- ==================== LOGIN PAGE ==================== -->
   <div id="loginPage">
@@ -675,14 +679,8 @@
         <div id="loginAlert"></div>
 
         <form id="loginForm" onsubmit="prosesLogin(event)">
-          <input 
-            type="password" 
-            id="kodeAkses" 
-            class="form-input" 
-            placeholder="Masukkan kode akses Anda"
-            autocomplete="off"
-            required
-          >
+          <input type="password" id="kodeAkses" class="form-input" placeholder="Masukkan kode akses Anda"
+            autocomplete="off" required>
 
           <div class="loading" id="loadingLogin">
             <div class="spinner"></div>
@@ -789,7 +787,8 @@
 
           <div class="form-group">
             <label class="form-label">Isi Pengaduan <span style="color: #ef4444;">*</span></label>
-            <textarea id="isiPengaduan" class="form-textarea" placeholder="Tuliskan detail pengaduan Anda di sini..." required></textarea>
+            <textarea id="isiPengaduan" class="form-textarea" placeholder="Tuliskan detail pengaduan Anda di sini..."
+              required></textarea>
           </div>
 
           <div class="form-group">
@@ -801,7 +800,8 @@
 
           <div class="form-group">
             <label class="form-label">Jawaban / Tindak Lanjut Petugas</label>
-            <textarea id="jawabanPetugas" class="form-textarea" placeholder="Tuliskan jawaban atau tindak lanjut dari petugas..."></textarea>
+            <textarea id="jawabanPetugas" class="form-textarea"
+              placeholder="Tuliskan jawaban atau tindak lanjut dari petugas..."></textarea>
           </div>
 
           <div class="loading" id="loadingForm">
@@ -907,45 +907,45 @@
   <script>
     // ==================== VERCEL / EXTERNAL API CONFIGURATION ====================
     // GANTI URL INI DENGAN URL WEB APP GOOGLE APPS SCRIPT KAMU SETELAH DEPLOY!
-    const SCRIPT_URL = 'https://script.google.com/macros/s/URL_KAMU_DISINI/exec';
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxuvmHXmPHCANQrg84TGf4wox4osoQ19BhKfbHNnjRc9CywyZli8Shrj2fLUvE8C9VSMA/exec';
 
     // Polyfill ajaib untuk mensimulasikan google.script.run menggunakan fetch API!
     // Ini memungkinkan web di-hosting di Vercel/Netlify tanpa mengubah kode JS di bawahnya.
     if (typeof google === 'undefined') {
       window.google = {};
     }
-    
+
     if (!google.script) {
       window.google.script = {
         run: new Proxy({}, {
-          get: function(target, prop) {
+          get: function (target, prop) {
             if (prop === 'withSuccessHandler') {
-              return function(handler) {
+              return function (handler) {
                 target._successHandler = handler;
                 return window.google.script.run;
               };
             }
             if (prop === 'withFailureHandler') {
-              return function(handler) {
+              return function (handler) {
                 target._failureHandler = handler;
                 return window.google.script.run;
               };
             }
-            
+
             // Eksekusi pemanggilan fungsi backend (misal: simpanLaporan, cekKodeAkses)
-            return function(...args) {
+            return function (...args) {
               const successHandler = target._successHandler;
               const failureHandler = target._failureHandler;
-              
+
               // Reset handlers untuk panggilan berikutnya
               target._successHandler = null;
               target._failureHandler = null;
-              
+
               // Tentukan Method: POST khusus untuk simpan data, sisanya GET
               const isPost = prop === 'simpanLaporan';
               let url = SCRIPT_URL + "?action=" + prop;
               let options = { method: isPost ? 'POST' : 'GET' };
-              
+
               if (isPost) {
                 options.body = JSON.stringify({ action: prop, formData: args[0] });
                 options.headers = { 'Content-Type': 'text/plain;charset=utf-8' }; // Hindari CORS Preflight
@@ -956,7 +956,7 @@
                   if (args[0]) url += '&tahun=' + encodeURIComponent(args[0]);
                 }
               }
-              
+
               fetch(url, options)
                 .then(response => response.json())
                 .then(result => {
@@ -1005,7 +1005,7 @@
         document.getElementById('navbar').classList.add('hidden');
         document.getElementById('dashboardPage').classList.remove('show');
         document.getElementById('reportPage').classList.remove('show');
-        
+
         // Reset login form
         document.getElementById('loginForm').reset();
         document.getElementById('kodeAkses').focus();
@@ -1020,7 +1020,7 @@
     }
 
     // ==================== LOGIN HANDLER ====================
-    document.getElementById('loginForm').addEventListener('submit', async function(e) {
+    document.getElementById('loginForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const kodeAkses = document.getElementById('kodeAkses').value.trim();
@@ -1038,7 +1038,7 @@
 
       try {
         google.script.run
-          .withSuccessHandler(function(result) {
+          .withSuccessHandler(function (result) {
             if (result.success) {
               showAlert('✅ ' + result.message, 'success', alertContainer);
               setTimeout(() => {
@@ -1054,7 +1054,7 @@
               loading.classList.remove('show');
             }
           })
-          .withFailureHandler(function(error) {
+          .withFailureHandler(function (error) {
             showAlert('❌ Terjadi kesalahan: ' + error, 'danger', alertContainer);
             loginBtn.disabled = false;
             loading.classList.remove('show');
@@ -1068,7 +1068,7 @@
     });
 
     // ==================== DASHBOARD HANDLER ====================
-    document.getElementById('reportForm').addEventListener('submit', async function(e) {
+    document.getElementById('reportForm').addEventListener('submit', async function (e) {
       e.preventDefault();
 
       const formData = {
@@ -1092,7 +1092,7 @@
 
       try {
         google.script.run
-          .withSuccessHandler(function(result) {
+          .withSuccessHandler(function (result) {
             if (result.success) {
               showAlert('✅ ' + result.message, 'success', alertContainer);
               document.getElementById('reportForm').reset();
@@ -1106,7 +1106,7 @@
             submitBtn.disabled = false;
             loading.classList.remove('show');
           })
-          .withFailureHandler(function(error) {
+          .withFailureHandler(function (error) {
             showAlert('❌ Terjadi kesalahan: ' + error, 'danger', alertContainer);
             submitBtn.disabled = false;
             loading.classList.remove('show');
@@ -1120,7 +1120,7 @@
     });
 
     // ==================== REPORT HANDLERS ====================
-    document.getElementById('tahunFilter').addEventListener('change', function() {
+    document.getElementById('tahunFilter').addEventListener('change', function () {
       document.getElementById('tahunDisplay').textContent = this.value;
       loadCharts();
       loadSummary();
@@ -1131,7 +1131,7 @@
 
       document.getElementById('loadingMonthly').classList.add('show');
       google.script.run
-        .withSuccessHandler(function(data) {
+        .withSuccessHandler(function (data) {
           document.getElementById('loadingMonthly').classList.remove('show');
           renderChartBulan(data, tahun);
           renderTableBulan(data);
@@ -1140,7 +1140,7 @@
 
       document.getElementById('loadingMedia').classList.add('show');
       google.script.run
-        .withSuccessHandler(function(data) {
+        .withSuccessHandler(function (data) {
           document.getElementById('loadingMedia').classList.remove('show');
           renderChartMedia(data);
           renderTableMedia(data);
@@ -1150,9 +1150,9 @@
 
     function loadSummary() {
       const tahun = parseInt(document.getElementById('tahunFilter').value);
-      
+
       google.script.run
-        .withSuccessHandler(function(data) {
+        .withSuccessHandler(function (data) {
           document.getElementById('summaryTotal').textContent = data.total;
           document.getElementById('summaryMasuk').textContent = data.masuk;
         })
@@ -1161,7 +1161,7 @@
 
     function renderChartBulan(data, tahun) {
       const ctx = document.getElementById('chartPerBulan').getContext('2d');
-      
+
       if (chartPerBulan) {
         chartPerBulan.destroy();
       }
@@ -1212,7 +1212,7 @@
 
     function renderChartMedia(data) {
       const ctx = document.getElementById('chartPerMedia').getContext('2d');
-      
+
       if (chartPerMedia) {
         chartPerMedia.destroy();
       }
@@ -1297,7 +1297,7 @@
     // ==================== DATA LOADERS ====================
     function loadStatistik() {
       google.script.run
-        .withSuccessHandler(function(data) {
+        .withSuccessHandler(function (data) {
           document.getElementById('totalLaporan').textContent = data.total;
           document.getElementById('pengaduanMasuk').textContent = data.masuk;
         })
@@ -1306,7 +1306,7 @@
 
     function loadDaftarPetugas() {
       google.script.run
-        .withSuccessHandler(function(petugas) {
+        .withSuccessHandler(function (petugas) {
           const select = document.getElementById('namaPetugas');
           petugas.forEach(nama => {
             const option = document.createElement('option');
@@ -1319,4 +1319,5 @@
     }
   </script>
 </body>
+
 </html>

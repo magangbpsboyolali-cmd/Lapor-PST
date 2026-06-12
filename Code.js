@@ -48,10 +48,10 @@ function doPost(e) {
     } else {
       result = { success: false, message: "Invalid POST action" };
     }
-  } catch(error) {
+  } catch (error) {
     result = { success: false, message: error.toString() };
   }
-  
+
   return ContentService.createTextOutput(JSON.stringify(result))
     .setMimeType(ContentService.MimeType.JSON);
 }
@@ -62,7 +62,7 @@ function doPost(e) {
 function cekKodeAkses(kodeInput) {
   try {
     Logger.log('Attempting login with code: ' + kodeInput);
-    
+
     const ss = SpreadsheetApp.openById(SHEET_ID);
     if (!ss) {
       Logger.log('ERROR: Cannot open spreadsheet with ID: ' + SHEET_ID);
@@ -101,10 +101,10 @@ function simpanLaporan(dataForm) {
     if (!sheet) return { success: false, message: "Sheet 'Data Pengaduan' belum dibuat!" };
 
     const timestamp = new Date();
-    
+
     // Parse tanggal dengan benar
     let tanggalInput = new Date(dataForm.tanggal);
-    
+
     // Pastikan format tanggal: YYYY-MM-DD
     const tahun = tanggalInput.getFullYear();
     const bulan = String(tanggalInput.getMonth() + 1).padStart(2, '0');
@@ -138,14 +138,14 @@ function getDaftarPetugas() {
   try {
     const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Daftar Petugas");
     if (!sheet) return [];
-    
+
     // Mengambil semua data di Kolom A (mulai dari baris ke-2 ke bawah)
     const data = sheet.getRange("A2:A").getValues();
-    
+
     // Membersihkan baris yang kosong
     const petugas = data.map(row => row[0]).filter(nama => nama !== "");
     return petugas;
-  } catch(e) {
+  } catch (e) {
     return [];
   }
 }
@@ -185,13 +185,13 @@ function getStatistikLaporan(tahun) {
           // Cek apakah tahun cocok
           if (tanggal.getFullYear() == filterTahun) {
             totalLaporan++;
-            
+
             // Cek apakah jawaban (kolom I, index 8) tidak kosong = selesai
             if (data[i][8] && data[i][8] !== "") {
               selesai++;
             }
           }
-        } catch(e) {
+        } catch (e) {
           continue;
         }
       }
@@ -202,7 +202,7 @@ function getStatistikLaporan(tahun) {
       masuk: totalLaporan - selesai,  // Belum selesai
       selesai: selesai
     };
-  } catch(e) {
+  } catch (e) {
     Logger.log('Error in getStatistikLaporan: ' + e.toString());
     return { total: 0, masuk: 0, selesai: 0 };
   }
@@ -222,7 +222,7 @@ function getLaporanPerBulan(tahun) {
     for (let i = 1; i < data.length; i++) {
       try {
         let tanggalValue = data[i][1]; // Kolom B - Tanggal (index 1)
-        
+
         // Handle jika sudah Date object
         let tanggal;
         if (tanggalValue instanceof Date) {
@@ -241,7 +241,7 @@ function getLaporanPerBulan(tahun) {
           const bulanIndex = tanggal.getMonth();
           bulan[bulanIndex]++;
         }
-      } catch(e) {
+      } catch (e) {
         // Skip row yang error
         Logger.log('Error parsing row ' + i + ': ' + e.toString());
         continue;
@@ -249,7 +249,7 @@ function getLaporanPerBulan(tahun) {
     }
 
     return bulan;
-  } catch(e) {
+  } catch (e) {
     Logger.log('Error in getLaporanPerBulan: ' + e.toString());
     return [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
   }
@@ -274,7 +274,7 @@ function getLaporanPerMedia(tahun) {
     };
 
     const data = sheet.getDataRange().getValues();
-    
+
     // Jika tahun tidak diberikan, gunakan tahun sekarang
     const filterTahun = tahun || new Date().getFullYear();
 
@@ -301,13 +301,13 @@ function getLaporanPerMedia(tahun) {
             mediaCount[media]++;
           }
         }
-      } catch(e) {
+      } catch (e) {
         continue;
       }
     }
 
     return mediaCount;
-  } catch(e) {
+  } catch (e) {
     return {};
   }
 }
