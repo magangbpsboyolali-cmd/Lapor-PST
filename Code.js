@@ -7,8 +7,10 @@ const SHEET_ID = '19SM7gIz4PYk9WfJn-50jp4yUWcKMTPD7C-mf0YdEEAs';
 function doGet(e) {
   // Handle CORS and preflight
   if (!e || !e.parameter || !e.parameter.action) {
-    return ContentService.createTextOutput(JSON.stringify({ success: false, message: "No action specified" }))
-      .setMimeType(ContentService.MimeType.JSON);
+    // Menampilkan UI (index.html) jika diakses langsung dari URL Web App
+    return HtmlService.createHtmlOutputFromFile('index')
+      .setTitle('Aplikasi Pelaporan PST')
+      .addMetaTag('viewport', 'width=device-width, initial-scale=1');
   }
 
   const action = e.parameter.action;
