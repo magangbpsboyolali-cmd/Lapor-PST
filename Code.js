@@ -1,14 +1,8 @@
-// ==========================================
-// BAGIAN LAILI (BACKEND) - Google Apps Script
-// ==========================================
-
-// 1. Laili: Isi ID Spreadsheet ini nanti setelah kamu buat Google Sheet-nya!
-// Cara cari ID: Buka Google Sheet > Copy teks panjang di URL antara /d/ dan /edit
+// Konfigurasi ID Spreadsheet Database Pelaporan PST
 const SHEET_ID = '19SM7gIz4PYk9WfJn-50jp4yUWcKMTPD7C-mf0YdEEAs';
 
 /**
  * Fungsi wajib GAS untuk merender halaman HTML
- * Cukup render 1 file: Index.html (Semua sudah gabung disitu)
  */
 function doGet() {
   let html = HtmlService.createHtmlOutputFromFile('Index');
@@ -33,7 +27,7 @@ function cekKodeAkses(kodeInput) {
 
     return { success: false, message: "Kode Akses Salah!" };
   } catch (e) {
-    return { success: false, message: "Error sistem: Cek ID Spreadsheet Laili!" };
+    return { success: false, message: "Terjadi kesalahan sistem saat memverifikasi kode akses." };
   }
 }
 
@@ -54,12 +48,32 @@ function simpanLaporan(dataForm) {
       dataForm.noHp,
       dataForm.jenis,
       dataForm.media,
+      dataForm.petugas, // Kolom baru untuk Petugas
       dataForm.isi,
       "" // Jawaban petugas kosong dulu
     ]);
 
     return { success: true, message: "Data berhasil disimpan ke Database!" };
   } catch (e) {
-    return { success: false, message: "Gagal menyimpan! Laili: Cek ID Sheet ya." };
+    return { success: false, message: "Gagal menyimpan data ke spreadsheet." };
+  }
+}
+
+/**
+ * Fungsi untuk mengambil daftar nama petugas dari Google Sheets
+ */
+function getDaftarPetugas() {
+  try {
+    const sheet = SpreadsheetApp.openById(SHEET_ID).getSheetByName("Daftar Petugas");
+    if (!sheet) return [];
+    
+    // Mengambil semua data di Kolom A (mulai dari baris ke-2 ke bawah)
+    const data = sheet.getRange("A2:A").getValues();
+    
+    // Membersihkan baris yang kosong
+    const petugas = data.map(row => row[0]).filter(nama => nama !== "");
+    return petugas;
+  } catch(e) {
+    return [];
   }
 }
