@@ -846,7 +846,7 @@
 
       <div class="charts-grid">
         <div class="chart-card">
-          <div class="chart-title">📅 Laporan Per Bulan (Tahun <span id="tahunDisplay">2024</span>)</div>
+          <div class="chart-title">📅 Laporan Per Bulan (Tahun <span id="tahunDisplay">2026</span>)</div>
           <div class="loading" id="loadingMonthly">
             <div class="spinner"></div>
           </div>
@@ -1087,7 +1087,7 @@
       google.script.run
         .withSuccessHandler(function(data) {
           document.getElementById('summaryTotal').textContent = data.total;
-          document.getElementById('summaryMasuk').textContent = data.total;
+          document.getElementById('summaryMasuk').textContent = data.masuk;
         })
         .getStatistikLaporan(tahun);
     }
@@ -1232,7 +1232,7 @@
       google.script.run
         .withSuccessHandler(function(data) {
           document.getElementById('totalLaporan').textContent = data.total;
-          document.getElementById('pengaduanMasuk').textContent = data.total;
+          document.getElementById('pengaduanMasuk').textContent = data.masuk;
         })
         .getStatistikLaporan();
     }
