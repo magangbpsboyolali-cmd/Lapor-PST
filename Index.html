@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Aplikasi Pelaporan PST</title>
+  <style>
+    /* =========================================
+       BAGIAN INTAN (CSS / TAMPILAN)
+       ========================================= */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+    :root {
+      --primary-color: #3b82f6; 
+      --bg-color: #f3f4f6;
+      --card-bg: rgba(255, 255, 255, 0.95);
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background-image: linear-gradient(135deg, #e0e7ff 0%, #dbeafe 100%);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .card {
+      background: var(--card-bg);
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.5);
+    }
+
+    h2 {
+      color: #1f2937;
+      margin-bottom: 5px;
+      text-align: center;
+    }
+
+    p.subtitle {
+      text-align: center;
+      color: #6b7280;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #4b5563;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px 15px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 15px;
+      box-sizing: border-box;
+      font-family: inherit;
+      transition: all 0.3s ease;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .btn-primary {
+      background-color: var(--primary-color);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background-color: #2563eb;
+    }
+    
+    .btn-primary:disabled {
+      background-color: #93c5fd;
+      cursor: not-allowed;
+    }
+
+    .alert {
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .alert-error {
+      background-color: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #f87171;
+    }
+
+    .alert-success {
+      background-color: #dcfce3;
+      color: #15803d;
+      border: 1px solid #4ade80;
+    }
+
+    /* Menyembunyikan form lapor di awal */
+    #halaman-form {
+      display: none;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- =========================================
+         HALAMAN LOGIN
+         ========================================= -->
+    <div class="card" id="halaman-login">
+      <h2>Sistem Pelaporan PST</h2>
+      <p class="subtitle">Silakan masukkan kode akses</p>
+      
+      <div class="alert alert-error" id="login-error">Kode akses salah!</div>
+      
+      <div class="form-group">
+        <label>Kode Akses</label>
+        <input type="password" id="kodeAkses" placeholder="Masukkan kode akses..." autocomplete="off">
+      </div>
+      
+      <button class="btn btn-primary" onclick="prosesLogin()" id="btnLogin">Masuk</button>
+    </div>
+
+    <!-- =========================================
+         HALAMAN FORM PELAPORAN
+         ========================================= -->
+    <div class="card" id="halaman-form">
+      <h2>Form Pelaporan</h2>
+      <p class="subtitle">Isi data pengaduan dengan lengkap</p>
+
+      <div class="alert alert-success" id="form-success">Data berhasil disimpan!</div>
+      <div class="alert alert-error" id="form-error">Terjadi kesalahan!</div>
+      
+      <div class="form-group">
+        <label>Tanggal</label>
+        <input type="date" id="tanggal">
+      </div>
+
+      <div class="form-group">
+        <label>Nama Pelapor</label>
+        <input type="text" id="nama" placeholder="Masukkan nama...">
+      </div>
+
+      <div class="form-group">
+        <label>No HP (WhatsApp)</label>
+        <input type="number" id="noHp" placeholder="08xxxxxxxx">
+      </div>
+
+      <div class="form-group">
+        <label>Jenis Pengaduan</label>
+        <select id="jenis">
+          <option value="" disabled selected>Pilih Jenis...</option>
+          <option value="Fasilitas">Fasilitas</option>
+          <option value="Pelayanan">Pelayanan</option>
+          <option value="Sistem Eror">Sistem Eror</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Media Pengaduan</label>
+        <select id="media">
+          <option value="" disabled selected>Pilih Media...</option>
+          <option value="WhatsApp">WhatsApp</option>
+          <option value="Instagram">Instagram</option>
+          <option value="Tatap Muka">Tatap Muka</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Isi Pengaduan</label>
+        <textarea id="isi" rows="4" placeholder="Tuliskan detail pengaduan..."></textarea>
+      </div>
+      
+      <button class="btn btn-primary" onclick="submitForm()" id="btnSubmit">Kirim Laporan</button>
+    </div>
+
+  </div>
+
+  <!-- =========================================
+       BAGIAN JAVASCRIPT (LOGIKA FRONTEND)
+       ========================================= -->
+  <script>
+    // Set default tanggal hari ini saat halaman dimuat
+    document.getElementById('tanggal').valueAsDate = new Date();
+
+    function prosesLogin() {
+      const kode = document.getElementById('kodeAkses').value;
+      const btn = document.getElementById('btnLogin');
+      const errorAlert = document.getElementById('login-error');
+      
+      if(!kode) {
+        errorAlert.innerText = "Kode tidak boleh kosong!";
+        errorAlert.style.display = "block";
+        return;
+      }
+
+      // Loading
+      btn.innerHTML = "Memeriksa...";
+      btn.disabled = true;
+      errorAlert.style.display = "none";
+
+      // Panggil backend
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if(response.success) {
+             // Sembunyikan halaman login, tampilkan halaman form!
+             document.getElementById('halaman-login').style.display = 'none';
+             document.getElementById('halaman-form').style.display = 'block';
+          } else {
+             errorAlert.innerText = response.message;
+             errorAlert.style.display = "block";
+             btn.innerHTML = "Masuk";
+             btn.disabled = false;
+          }
+        })
+        .withFailureHandler(function(error) {
+           errorAlert.innerText = "Gagal terhubung ke server.";
+           errorAlert.style.display = "block";
+           btn.innerHTML = "Masuk";
+           btn.disabled = false;
+        })
+        .cekKodeAkses(kode);
+    }
+
+    function submitForm() {
+      const formSuccess = document.getElementById('form-success');
+      const formError = document.getElementById('form-error');
+      
+      const dataForm = {
+        tanggal: document.getElementById('tanggal').value,
+        nama: document.getElementById('nama').value,
+        noHp: document.getElementById('noHp').value,
+        jenis: document.getElementById('jenis').value,
+        media: document.getElementById('media').value,
+        isi: document.getElementById('isi').value
+      };
+
+      // Validasi sederhana
+      if(!dataForm.nama || !dataForm.jenis || !dataForm.isi) {
+        formError.innerText = "Mohon lengkapi semua isian!";
+        formError.style.display = 'block';
+        setTimeout(() => formError.style.display = 'none', 3000);
+        return;
+      }
+
+      const btn = document.getElementById('btnSubmit');
+      btn.innerHTML = "Menyimpan...";
+      btn.disabled = true;
+      formSuccess.style.display = 'none';
+      formError.style.display = 'none';
+
+      // Kirim data ke backend
+      google.script.run
+        .withSuccessHandler(function(response) {
+          if(response.success) {
+            formSuccess.innerText = response.message;
+            formSuccess.style.display = 'block';
+            
+            // Reset isian kecuali tanggal
+            document.getElementById('nama').value = '';
+            document.getElementById('noHp').value = '';
+            document.getElementById('jenis').value = '';
+            document.getElementById('media').value = '';
+            document.getElementById('isi').value = '';
+
+            setTimeout(() => formSuccess.style.display = 'none', 5000);
+          } else {
+            formError.innerText = response.message;
+            formError.style.display = 'block';
+          }
+          btn.innerHTML = "Kirim Laporan";
+          btn.disabled = false;
+        })
+        .withFailureHandler(function(error) {
+          formError.innerText = "Gagal menyimpan. Cek koneksi!";
+          formError.style.display = 'block';
+          btn.innerHTML = "Kirim Laporan";
+          btn.disabled = false;
+        })
+        .simpanLaporan(dataForm);
+    }
+  </script>
+</body>
+</html>
