@@ -247,7 +247,6 @@ function loadSummary() {
   google.script.run
     .withSuccessHandler(function (data) {
       document.getElementById('summaryTotal').textContent = data.total;
-      document.getElementById('summaryMasuk').textContent = data.masuk;
     })
     .getStatistikLaporan(tahun);
 }
@@ -392,7 +391,6 @@ function loadStatistik() {
   google.script.run
     .withSuccessHandler(function (data) {
       document.getElementById('totalLaporan').textContent = data.total;
-      document.getElementById('pengaduanMasuk').textContent = data.masuk;
     })
     .getStatistikLaporan();
 }
